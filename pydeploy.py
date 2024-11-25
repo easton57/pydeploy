@@ -59,6 +59,12 @@ def deploy_software(username, password, patch_name, computers):
         process=subprocess.Popen(["powershell", f"Copy-Item -Path patches\\{patch_name} -Destination {patch_dir}"], stdout=subprocess.PIPE)
         process.communicate()
 
+        # Copy the permissions file if needed
+        if 'perms' in patch_name:
+            # Copy perms file to remote server
+            process=subprocess.Popen(["powershell", f"Copy-Item -Path patches\\perms.txt -Destination {patch_dir}"], stdout=subprocess.PIPE)
+            process.communicate()
+
         # Establish a connection to the remote Windows machine
         session = winrm.Session(f"{computer}", auth=(username, password), transport='ntlm')
         
