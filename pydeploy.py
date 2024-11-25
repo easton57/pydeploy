@@ -80,11 +80,15 @@ def deploy_software(username, password, patch_name, computers):
             script = f"""
             powershell {patch_dir}{patch_name}
             """
+        else:  # Default for EXE
+            script = f"""
+            start-process -FilePath "{patch_dir}{patch_name}" -ArgumentList '/S' -Verb runas -Wait
+            """  # This may only work on notepad++ but we will see later.
         
         # Execute the PowerShell script on the remote machine
         result = session.run_ps(script)
         
-        if result.status_code == 0:
+        if result.status_code == 0:  # TODO: Modify to handle winrm.exceptions.InvalidCredentialsError
             print(f"Successfully installed {patch_name} on {computer}")
         else:
             print(f"Failed to install {patch_name} on {computer}")
@@ -98,7 +102,7 @@ def folder_check(folder_name):
         print(f"Created {folder_name} folder")
         mkdir(folder_name)
     else:
-        print(f"{folder_name} folder exists... continuing...\n\n")
+        print(f"{folder_name} folder exists... continuing...\n")
 
 if __name__ == "__main__":
     # Create needed directories
