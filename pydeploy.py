@@ -6,6 +6,8 @@ import subprocess
 from os import listdir, mkdir
 from getpass import getpass
 
+import winrm.exceptions
+
 # TODO: Create logging
 
 
@@ -85,17 +87,20 @@ def deploy_software(username, password, patch_name, computers):
             start-process -FilePath "{patch_dir}{patch_name}" -ArgumentList '/S' -Verb runas -Wait
             """  # This may only work on notepad++ but we will see later.
         
-        # Execute the PowerShell script on the remote machine
-        result = session.run_ps(script)
-        
-        if result.status_code == 0:  # TODO: Modify to handle winrm.exceptions.InvalidCredentialsError
-            print(f"Successfully installed {patch_name} on {computer}")
-        else:
-            print(f"Failed to install {patch_name} on {computer}")
+        try:
+            # Execute the PowerShell script on the remote machine
+            result = session.run_ps(script)
 
-        # Clear patches folder from remote host
-        process=subprocess.Popen(["powershell", f"Remove-Item {patch_dir} -recurse"], stdout=subprocess.PIPE)
-        process.communicate()
+            if result.status_code == 0:
+                print(f"Successfully installed {patch_name} on {computer}")
+            else:
+                print(f"Failed to install {patch_name} on {computer}")
+
+            # Clear patches folder from remote host
+            process=subprocess.Popen(["powershell", f"Remove-Item {patch_dir} -recurse"], stdout=subprocess.PIPE)
+            process.communicate()
+        except winrm.exceptions.InvalidCredentialsError:
+            print(f"Invalid Credentials! Check your password or permissions on the remote system {computer}.")
 
 def folder_check(folder_name):
     if folder_name not in listdir('.'):
