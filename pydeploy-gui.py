@@ -5,9 +5,12 @@ from pathlib import Path
 from PySide6.QtWidgets import *
 from PySide6 import QtCore, QtGui
 
+# TODO: Create a error dialogue and check for empty fields
+
 class PyDeployGui(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("PyDeploy")
 
         # Declare widgets in their groups
         self.create_nav_buttons()
