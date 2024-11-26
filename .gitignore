@@ -1,5 +1,5 @@
 venv
 patches
-computers.csv
+*.csv
 logs
 __pycache__
