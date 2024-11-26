@@ -38,8 +38,11 @@ def cli_run():
     username = input("Enter username: ")
     password = getpass("Enter password: ")
 
+    # Parameters
+    additional_args = input("Please enter any additional arguments for the installer: ")
+
     # Send it to the deployment software
-    deploy_software(username, password, patch_name, computers, None)
+    deploy_software(username, password, patch_name, computers, additional_args)
 
 
 def deploy_software(username, password, patch_name, computers, additional_args):
