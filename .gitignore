@@ -2,3 +2,4 @@ venv
 patches
 computers.csv
 logs
+__pycache__
