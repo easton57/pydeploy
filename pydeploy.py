@@ -10,20 +10,17 @@ from getpass import getpass
 
 
 def cli_run():
-    # Declare empty list
-    computers = []
+    # Health check
+    health_check()
 
     # CSV column name for patches
     csv_field = input("Enter the csv column name for your computers: ")
 
     # List of target Windows hosts from csv
-    with open ('computers.csv', mode='r') as comp_file:
-        read_csv = csv.DictReader(comp_file)
-        for i in read_csv:
-            computers.append(i[csv_field])
+    computers = get_computers("computers.csv", csv_field)
 
     # Read list of patches in patch directory
-    patch_names = listdir('patches')
+    patch_names = read_patches()
 
     num = 0
 
@@ -43,7 +40,7 @@ def cli_run():
     deploy_software(username, password, patch_name, computers)
 
 
-def deploy_software(username, password, patch_name, computers):
+def deploy_software(username, password, patch_name, computers, additional_args):
     # Loop through the read computers
     for computer in computers:
         # Patch Directory
@@ -65,8 +62,6 @@ def deploy_software(username, password, patch_name, computers):
                 additional_args = "IACCEPTMSOLEDBSQLLICENSETERMS=YES"
             elif 'odbc' in patch_name:
                 additional_args = "IACCEPTMSODBCSQLLICENSETERMS=YES"
-            else:
-                additional_args = ""
 
             # PowerShell script to install software patches from the shared path or URL
             script = f"""
@@ -93,6 +88,11 @@ def deploy_software(username, password, patch_name, computers):
         process=subprocess.Popen(["powershell", f"Remove-Item {patch_dir} -recurse"], stdout=subprocess.PIPE)
         process.communicate()
 
+def health_check():
+    # Create needed directories
+    folder_check('patches')
+    folder_check('logs')
+
 def folder_check(folder_name):
     if folder_name not in listdir('.'):
         print(f"Created {folder_name} folder")
@@ -100,11 +100,21 @@ def folder_check(folder_name):
     else:
         print(f"{folder_name} folder exists... continuing...\n\n")
 
+def get_computers(csv_file, csv_field) -> list:
+    """Return the list of computers from the specified CSV file"""
+    computers = []
+
+    with open (csv_file, mode='r') as comp_file:
+        read_csv = csv.DictReader(comp_file)
+        for i in read_csv:
+            computers.append(i[csv_field])
+
+    return computers
+
+def read_patches() -> list:
+    """ Modularity is cool (this is for easier reading from the GUI)"""
+    return listdir('patches')
+
 if __name__ == "__main__":
-    # Create needed directories
-    folder_check('patches')
-    folder_check('logs')
-    
-    # Run the CLI
-    # TODO: Create a GUI
+    # Run the CLI if launched directly
     cli_run()
