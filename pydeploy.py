@@ -54,6 +54,7 @@ def deploy_software(username, password, patch_name, computers, additional_args):
         # Patch Directory
         patch_dir = f"\\\\{computer}\\c$\\Patches\\"
 
+        # TODO: Have a check for these to verify if the patch or directory have been made
         # Create patch path on remote server
         process=subprocess.Popen(["powershell", f"mkdir {patch_dir}"], stdout=subprocess.PIPE)
         process.communicate()
