@@ -1,6 +1,7 @@
 import sys
 import pydeploy
 
+from pathlib import Path
 from PySide6.QtWidgets import *
 from PySide6 import QtCore, QtGui
 
@@ -42,18 +43,21 @@ class PyDeployGui(QWidget):
         layout = QFormLayout()
 
         self.csv_file = QLineEdit()  # Place holder until I find the proper widget
+        self.csv_browse = QPushButton("Browse for CSV")
         self.csv_column = QLineEdit()
         self.username_input = QLineEdit()
         self.password_input = QLineEdit()
         self.parameter_input = QLineEdit()
         self.patch_box = QComboBox()
 
+        self.csv_browse.clicked.connect(self.browse_dialogue)
         self.password_input.setEchoMode(QLineEdit.Password)
 
         # Add Rows to the Form
         layout.addRow(QLabel("Username:"), self.username_input)
         layout.addRow(QLabel("Password:"), self.password_input)
         layout.addRow(QLabel("Computer CSV:"), self.csv_file)
+        layout.addRow(self.csv_browse)
         layout.addRow(QLabel("CSV Column:"), self.csv_column)
         layout.addRow(QLabel("Patch:"), self.patch_box)
         layout.addRow(QLabel("Extra Parameters:"), self.parameter_input)
@@ -62,6 +66,17 @@ class PyDeployGui(QWidget):
 
         # Save the layout
         self._form_group_box.setLayout(layout)
+
+    def browse_dialogue(self):
+        """Dialogue for finding a CSV"""
+        filename, ok = QFileDialog.getOpenFileName(
+            self,
+            "Select a File",
+            ".",
+            "CSV (*.csv)"
+        )
+
+        self.csv_file.setText(str(Path(filename)))
 
     def deploy_status(self, success, failed) -> None:
         """Pop up and show which servers succeeded and which failed"""
