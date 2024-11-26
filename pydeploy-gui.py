@@ -18,7 +18,7 @@ class PyDeployGui(QWidget):
         self.layout.addWidget(self._horizontal_group_box)
 
         # Declare button functionality
-        self.deploy_button.clicked.connect(self.exit)
+        self.deploy_button.clicked.connect(self.deploy)
         self.cancel_button.clicked.connect(self.exit)
 
     def create_nav_buttons(self) -> None:
@@ -48,6 +48,8 @@ class PyDeployGui(QWidget):
         self.parameter_input = QLineEdit()
         self.patch_box = QComboBox()
 
+        self.password_input.setEchoMode(QLineEdit.Password)
+
         # Add Rows to the Form
         layout.addRow(QLabel("Username:"), self.username_input)
         layout.addRow(QLabel("Password:"), self.password_input)
@@ -61,14 +63,26 @@ class PyDeployGui(QWidget):
         # Save the layout
         self._form_group_box.setLayout(layout)
 
+    def deploy_status(self, success, failed) -> None:
+        """Pop up and show which servers succeeded and which failed"""
+        status = QMessageBox(self)
+        status.setWindowTitle("Server Patch Status")
+        status.setText(f"The following servers succeded: {success}\n\n \
+                       The following servers failed: {failed}")
+        status.setStandardButtons(QMessageBox.Ok)
+        button = status.exec()
+
+        if button == QMessageBox.Ok:
+            status.close()
+
     def deploy(self) -> None:
         """Function for pushing the deployment"""
         # TODO: Make the extra parameters do stuff
-        computers = pydeploy.get_computers(self.csv_file.text, self.csv_column.text)
+        computers = pydeploy.get_computers(self.csv_file.text(), self.csv_column.text())
 
-        pydeploy.deploy_software(self.username_input.text, self.password_input.text, self.patch_box.itemText, computers, self.parameter_input.text)
+        success, failed = pydeploy.deploy_software(self.username_input.text(), self.password_input.text(), self.patch_box.currentText(), computers, self.parameter_input.text())
 
-        # TODO: Popup showing the systems it succeeded on and the systems it failed on
+        self.deploy_status(success, failed)
 
     def exit(self) -> None:
         """Silly little funciton to quit the program"""
