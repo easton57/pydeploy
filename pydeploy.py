@@ -39,10 +39,13 @@ def cli_run():
     password = getpass("Enter password: ")
 
     # Send it to the deployment software
-    deploy_software(username, password, patch_name, computers)
+    deploy_software(username, password, patch_name, computers, None)
 
 
 def deploy_software(username, password, patch_name, computers, additional_args):
+    success = []
+    failed = []
+
     # Loop through the read computers
     for computer in computers:
         # Patch Directory
@@ -94,14 +97,19 @@ def deploy_software(username, password, patch_name, computers, additional_args):
 
             if result.status_code == 0:
                 print(f"Successfully installed {patch_name} on {computer}")
+                success.append(computer)
             else:
                 print(f"Failed to install {patch_name} on {computer}")
+                failed.append(computer)
 
             # Clear patches folder from remote host
             process=subprocess.Popen(["powershell", f"Remove-Item {patch_dir} -recurse"], stdout=subprocess.PIPE)
             process.communicate()
         except winrm.exceptions.InvalidCredentialsError:
             print(f"Invalid Credentials! Check your password or permissions on the remote system {computer}.")
+            failed.append(computer)
+
+    return success, failed
 
 def health_check():
     # Create needed directories
