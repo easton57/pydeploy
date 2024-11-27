@@ -3,7 +3,6 @@ import pydeploy
 
 from pathlib import Path
 from PySide6.QtWidgets import *
-from PySide6 import QtCore, QtGui
 
 # TODO: Create a error dialogue and check for empty fields
 
